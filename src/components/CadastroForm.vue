@@ -1,4 +1,17 @@
+<script setup>
+import { ref } from 'vue'
 
+const senha = ref('')
+const confirmarSenha = ref('')
+function validarCadastro() {
+  if (senha.value !== confirmarSenha.value) {
+    alert('As senhas não coincidem. Tente novamente.')
+    return
+  }
+
+  alert('Formulário validado com sucesso!')
+}
+</script>
 <template>
   <section class="cadastro">
     <div class="formulario">
@@ -8,7 +21,7 @@
         Sua próxima história começa aqui.
       </p>
 
-      <form>
+      <form @submit.prevent="validarCadastro">
         <label for="nome">Nome completo</label>
         <input
           id="nome"
@@ -35,6 +48,7 @@
           autocomplete="new-password"
           minlength="8"
           required
+          v-model="senha"
         />
 
         <label for="confirmarSenha">
@@ -47,9 +61,10 @@
           autocomplete="new-password"
           minlength="8"
           required
+          v-model="confirmarSenha"
         />
 
-        <button type="button">
+        <button type="submit">
           Criar minha conta ❤️
         </button>
       </form>
