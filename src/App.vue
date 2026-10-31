@@ -1,4 +1,19 @@
 
+<script setup>
+import { ref } from 'vue'
+import CadastroForm from './components/CadastroForm.vue'
+
+const mostrarCadastro = ref(false)
+
+function abrirCadastro() {
+  mostrarCadastro.value = true
+}
+
+function voltarInicio() {
+  mostrarCadastro.value = false
+}
+</script>
+
 <template>
   <div class="pagina">
     <header class="cabecalho">
@@ -16,13 +31,33 @@
           Entrar
         </button>
 
-        <button type="button" class="botao-cadastro">
-          Criar conta
-        </button>
+        
+<button
+  type="button"
+  class="botao-cadastro"
+  @click="abrirCadastro"
+>
+  Criar conta
+</button>
+
       </div>
     </header>
+    
+<div v-if="mostrarCadastro">
+  <button
+    type="button"
+    class="voltar"
+    @click="voltarInicio"
+  >
+    ← Voltar ao início
+  </button>
 
-    <main id="inicio" class="inicio">
+  <CadastroForm />
+</div>
+
+
+    <main v-else id="inicio" class="inicio">
+
       <div class="conteudo">
         <h1> RosaCupido</h1>
         <h2>Encontre alguém especial</h2>
@@ -169,6 +204,17 @@ button:hover {
   .navegacao {
     justify-content: center;
   }
+}
+
+
+.voltar {
+  margin: 15px 6%;
+  background-color: #fff0f2;
+  color: #a7102d;
+  border: 1px solid #edcdd2;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
 }
 
 </style>
