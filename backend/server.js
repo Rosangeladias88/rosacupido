@@ -64,6 +64,63 @@ app.post("/cadastro", async (req, res) => {
 });
 
 
+app.post("/login", async (req, res) => {
+  try {
+    const { email, senha } = req.body ?? {};
+
+    if (
+      typeof email !== "string" ||
+      typeof senha !== "string" ||
+      !email.trim() ||
+      !senha
+    ) {
+      return res.status(400).json({
+        mensagem: "Informe o e-mail e a senha."
+      });
+    }
+
+    const [usuarios] = await conexao.execute(
+      "SELECT id, nome, email, senha FROM usuarios WHERE email = ?",
+      [email.trim().toLowerCase()]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(401).json({
+        mensagem: "E-mail ou senha inválidos."
+      });
+    }
+
+    const usuario = usuarios[0];
+
+    const senhaCorreta = await bcrypt.compare(
+      senha,
+      usuario.senha
+    );
+
+    if (!senhaCorreta) {
+      return res.status(401).json({
+        mensagem: "E-mail ou senha inválidos."
+      });
+    }
+
+    return res.status(200).json({
+      mensagem: "Credenciais verificadas com sucesso!",
+      usuario: {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email
+      }
+    });
+
+  } catch (erro) {
+    console.error("Erro ao verificar login:", erro.message);
+
+    return res.status(500).json({
+      mensagem: "Erro interno ao verificar login."
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
