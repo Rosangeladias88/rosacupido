@@ -1,17 +1,48 @@
+
 <script setup>
 import { ref } from 'vue'
 
+const nome = ref('')
+const email = ref('')
 const senha = ref('')
 const confirmarSenha = ref('')
-function validarCadastro() {
+
+async function validarCadastro() {
   if (senha.value !== confirmarSenha.value) {
     alert('As senhas não coincidem. Tente novamente.')
     return
   }
 
-  alert('Formulário validado com sucesso!')
+  const dadosCadastro = {
+    nome: nome.value.trim(),
+    email: email.value.trim(),
+    senha: senha.value
+  }
+
+  try {
+    const resposta = await fetch('http://localhost:3000/cadastro', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dadosCadastro)
+    })
+
+    const resultado = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(resultado.mensagem || 'Erro ao enviar cadastro.')
+      return
+    }
+
+    alert(resultado.mensagem)
+  } catch (erro) {
+    console.error('Erro ao comunicar com o servidor:', erro)
+    alert('Não foi possível conectar ao servidor.')
+  }
 }
 </script>
+
 <template>
   <section class="cadastro">
     <div class="formulario">
@@ -25,6 +56,7 @@ function validarCadastro() {
         <label for="nome">Nome completo</label>
         <input
           id="nome"
+          v-model="nome"
           type="text"
           placeholder="Digite seu nome"
           autocomplete="name"
@@ -34,6 +66,7 @@ function validarCadastro() {
         <label for="email">E-mail</label>
         <input
           id="email"
+          v-model="email"
           type="email"
           placeholder="Digite seu e-mail"
           autocomplete="email"
@@ -43,12 +76,12 @@ function validarCadastro() {
         <label for="senha">Senha</label>
         <input
           id="senha"
+          v-model="senha"
           type="password"
           placeholder="Crie uma senha"
           autocomplete="new-password"
           minlength="8"
           required
-          v-model="senha"
         />
 
         <label for="confirmarSenha">
@@ -56,12 +89,12 @@ function validarCadastro() {
         </label>
         <input
           id="confirmarSenha"
+          v-model="confirmarSenha"
           type="password"
           placeholder="Confirme sua senha"
           autocomplete="new-password"
           minlength="8"
           required
-          v-model="confirmarSenha"
         />
 
         <button type="submit">
@@ -115,6 +148,7 @@ label {
 }
 
 input {
+  box-sizing: border-box;
   width: 100%;
   padding: 13px;
   border: 1px solid #edcdd2;
