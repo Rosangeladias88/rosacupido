@@ -1,4 +1,5 @@
-
+require("dotenv").config();
+const session = require("express-session");   
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
@@ -9,6 +10,19 @@ const PORT = 3000;
 
 app.use(cors({origin: "http://localhost:5173"}));
 app.use(express.json());
+
+app.use(session({
+  name: "rosacupido.sid",
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60
+  }
+}));
 
 app.get("/", (req, res) => {
   res.send("Servidor RosaCupido funcionando! ❤️");
@@ -103,14 +117,38 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    
+req.session.regenerate((erroSessao) => {
+  if (erroSessao) {
+    console.error("Erro ao criar sessão:", erroSessao);
+
+    return res.status(500).json({
+      mensagem: "Não foi possível iniciar a sessão."
+    });
+  }
+
+  req.session.usuarioId = usuario.id;
+
+  req.session.save((erroSalvar) => {
+    if (erroSalvar) {
+      console.error("Erro ao salvar sessão:", erroSalvar);
+
+      return res.status(500).json({
+        mensagem: "Não foi possível salvar a sessão."
+      });
+    }
+
     return res.status(200).json({
-      mensagem: "Credenciais verificadas com sucesso!",
+      mensagem: "Login realizado com sucesso!",
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email
       }
     });
+  });
+});
+
 
   } catch (erro) {
     console.error("Erro ao verificar login:", erro.message);
@@ -121,6 +159,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
+app.get("/sessao", (req, res) => {
+  if (!req.session.usuarioId) {
+    return res.status(401).json({
+      mensagem: "Usuário não autenticado."
+    });
+  }
+
+  return res.status(200).json({
+    mensagem: "Sessão ativa!",
+    usuarioId: req.session.usuarioId
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
+
